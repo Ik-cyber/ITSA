@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 const saltRounds = 10;
 
-const subAdminSchema = new mongoose.Schema({
+const staffSchema = new mongoose.Schema({
   // name: {
   //   type: String,
   //   required: true,
@@ -21,7 +21,7 @@ const subAdminSchema = new mongoose.Schema({
     required: [true, "Your email address is required"],
     unique: true,
   },
-  adminName: {
+  staffName: {
     type: String,
     required: [true, "Your name is required"],
   },
@@ -35,31 +35,32 @@ const subAdminSchema = new mongoose.Schema({
   },
 });
 
-subAdminSchema.pre("save", async function (next) {
-  var subAdmin = this;
+staffSchema.pre("save", async function (next) {
+  var user = this;
+  console.log("pre");
 
-  if (subAdmin.isModified("password")) {
-    subAdmin.password = await bcrypt.hash(subAdmin.password, 8);
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
   }
 
   next();
 });
 
-// subAdminSchema.statics.findByCredentials = async (email, password) => {
-//   const subAdmin = await SubAdmin.findOne({ email });
+// userSchema.statics.findByCredentials = async (email, password) => {
+//   const user = await User.findOne({ email });
 
-//   if (!subAdmin) {
+//   if (!user) {
 //     throw new Error("Unable to login");
 //   }
 
-//   const isMatch = await bcrypt.compare(password, subAdmin.password);
+//   const isMatch = await bcrypt.compare(password, user.password);
 //   if (!isMatch) {
 //     throw new Error("Unable to login");
 //   }
 
-//   return subAdmin;
+//   return user;
 // };
 
-const SubAdmin = mongoose.model("subAdmin", subAdminSchema);
+const Staff = mongoose.model("Staff", staffSchema);
 
-export default SubAdmin;
+export default Staff;

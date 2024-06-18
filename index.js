@@ -1,7 +1,5 @@
 import express from "express"
 import dotenv from "dotenv"
-
-
 import userRouter from "./router/user.js"
 import subAdminRouter from "./router/subAdmin.js"
 import testRouter from "./router/testRouter.js"
@@ -11,10 +9,10 @@ import companySignUpRouter from "./router/companySignUp.js"
 import bodyParser from "body-parser"
 import cors from "cors"
 
+dotenv.config()
+
 import "./db/mongDB.js"
 
-
-dotenv.config()
 
 const app = express()
 

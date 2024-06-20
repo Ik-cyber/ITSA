@@ -28,13 +28,11 @@
 
 // export default router;
 
-
 import express from "express";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import Staff from "../models/staff.js";
 
-
-import createSecretToken from "../utils/SecretJson.js"
+import createSecretToken from "../utils/SecretJson.js";
 
 const router = express.Router();
 
@@ -56,13 +54,18 @@ router.post("/staff", async (req, res) => {
     }
     const staff = await Staff.create({ email, password, staffName, createdAt });
     const token = createSecretToken(staff._id);
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
-    });
+    // res.cookie("token", token, {
+    //   withCredentials: true,
+    //   httpOnly: false,
+    // });
     res
       .status(201)
-      .json({ message: "Sub-admin created successfully", success: true, staff });
+      .json({
+        message: "Sub-admin created successfully",
+        success: true,
+        staff,
+        token,
+      });
   } catch (error) {
     console.error(error);
   }
@@ -103,23 +106,29 @@ router.post("/staffs/login", async (req, res) => {
 
   try {
     const { email, password } = req.body;
-    if(!email || !password ){
-      return res.json({message:'All fields are required'})
+    if (!email || !password) {
+      return res.json({ message: "All fields are required" });
     }
     const staff = await Staff.findOne({ email });
-    if(!staff){
-      return res.json({message:'Incorrect password or email' }) 
+    if (!staff) {
+      return res.json({ message: "Incorrect password or email" });
     }
-    const auth = await bcrypt.compare(password, staff.password)
+    const auth = await bcrypt.compare(password, staff.password);
     if (!auth) {
-      return res.json({message:'Incorrect password or email' }) 
+      return res.json({ message: "Incorrect password or email" });
     }
-     const token = createSecretToken(staff._id);
-     res.cookie("token", token, {
-       withCredentials: true,
-       httpOnly: false,
-     });
-     res.status(201).json({ message: "User logged in successfully", success: true });
+    const token = createSecretToken(staff._id);
+    res.cookie("token", token, {
+      withCredentials: true,
+      httpOnly: false,
+    });
+    res
+      .status(201)
+      .json({
+        message: "User logged in successfully",
+        success: true,
+        token: token,
+      });
   } catch (error) {
     console.error(error);
   }

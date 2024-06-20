@@ -1,8 +1,8 @@
 import express from "express";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import SubAdmin from "../models/subAdmin.js";
 
-import createSecretToken from "../utils/SecretJson.js"
+import createSecretToken from "../utils/SecretJson.js";
 
 const router = express.Router();
 
@@ -22,15 +22,25 @@ router.post("/subAdmin", async (req, res) => {
     if (existingUser) {
       return res.json({ message: "User already exists" });
     }
-    const subAdmin = await SubAdmin.create({ email, password, adminName, createdAt });
-    const token = createSecretToken(subAdmin._id);
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
+    const subAdmin = await SubAdmin.create({
+      email,
+      password,
+      adminName,
+      createdAt,
     });
+    const token = createSecretToken(subAdmin._id);
+    // res.cookie("token", token, {
+    //   withCredentials: true,
+    //   httpOnly: false,
+    // });
     res
       .status(201)
-      .json({ message: "Sub-admin created successfully", success: true, subAdmin });
+      .json({
+        message: "Sub-admin created successfully",
+        success: true,
+        subAdmin,
+        token,
+      });
   } catch (error) {
     console.error(error);
   }
@@ -71,23 +81,25 @@ router.post("/subAdmins/login", async (req, res) => {
 
   try {
     const { email, password } = req.body;
-    if(!email || !password ){
-      return res.json({message:'All fields are required'})
+    if (!email || !password) {
+      return res.json({ message: "All fields are required" });
     }
     const subAdmin = await SubAdmin.findOne({ email });
-    if(!subAdmin){
-      return res.json({message:'Incorrect password or email' }) 
+    if (!subAdmin) {
+      return res.json({ message: "Incorrect password or email" });
     }
-    const auth = await bcrypt.compare(password, subAdmin.password)
+    const auth = await bcrypt.compare(password, subAdmin.password);
     if (!auth) {
-      return res.json({message:'Incorrect password or email' }) 
+      return res.json({ message: "Incorrect password or email" });
     }
-     const token = createSecretToken(subAdmin._id);
-     res.cookie("token", token, {
-       withCredentials: true,
-       httpOnly: false,
-     });
-     res.status(201).json({ message: "User logged in successfully", success: true });
+    const token = createSecretToken(subAdmin._id);
+    //  res.cookie("token", token, {
+    //    withCredentials: true,
+    //    httpOnly: false,
+    //  });
+    res
+      .status(201)
+      .json({ message: "User logged in successfully", success: true, token });
   } catch (error) {
     console.error(error);
   }

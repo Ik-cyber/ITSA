@@ -1,21 +1,15 @@
 import express from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import SubAdmin from "../models/subAdmin.js";
+import Staffs from "../models/staff.js";
 
 import createSecretToken from "../utils/SecretJson.js";
+import Staff from "../models/staff.js";
 
 const router = express.Router();
 
 router.post("/subAdmin", async (req, res) => {
-  // try {
-  //   const subAdminData = new SubAdmin(req.body);
-  //   await subAdminData.save();
-
-  //   res.send("Successful");
-  // } catch (err) {
-  //   res.send(err);
-  // }
-
   try {
     const { email, password, adminName, createdAt } = req.body;
     const existingUser = await SubAdmin.findOne({ email });
@@ -29,56 +23,18 @@ router.post("/subAdmin", async (req, res) => {
       createdAt,
     });
     const token = createSecretToken(subAdmin._id);
-    // res.cookie("token", token, {
-    //   withCredentials: true,
-    //   httpOnly: false,
-    // });
-    res
-      .status(201)
-      .json({
-        message: "Sub-admin created successfully",
-        success: true,
-        subAdmin,
-        token,
-      });
+    res.status(201).json({
+      message: "Sub-admin created successfully",
+      success: true,
+      subAdmin,
+      token,
+    });
   } catch (error) {
     console.error(error);
   }
-
-  // module.exports.Signup = async (req, res, next) => {
-  //   try {
-  //     const { email, password, username, createdAt } = req.body;
-  //     const existingUser = await User.findOne({ email });
-  //     if (existingUser) {
-  //       return res.json({ message: "User already exists" });
-  //     }
-  //     const user = await User.create({ email, password, username, createdAt });
-  //     const token = createSecretToken(user._id);
-  //     res.cookie("token", token, {
-  //       withCredentials: true,
-  //       httpOnly: false,
-  //     });
-  //     res
-  //       .status(201)
-  //       .json({ message: "User signed in successfully", success: true, user });
-  //     next();
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 });
 
 router.post("/subAdmins/login", async (req, res) => {
-  // try {
-  //   const subAdmin = await SubAdmin.findByCredentials(
-  //     req.body.email,
-  //     req.body.password
-  //   );
-  //   res.send(subAdmin);
-  // } catch (e) {
-  //   res.status(400).send(e);
-  // }
-
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -93,16 +49,41 @@ router.post("/subAdmins/login", async (req, res) => {
       return res.json({ message: "Incorrect password or email" });
     }
     const token = createSecretToken(subAdmin._id);
-    //  res.cookie("token", token, {
-    //    withCredentials: true,
-    //    httpOnly: false,
-    //  });
     res
       .status(201)
-      .json({ message: "User logged in successfully", success: true, token });
+      .json({
+        message: "User logged in successfully",
+        success: true,
+        subAdmin,
+        token,
+      });
   } catch (error) {
     console.error(error);
   }
 });
+
+router.get("/subAdmin/staffs", async (req, res) => {
+  const headerData = req.header("Authorization");
+  const token = headerData.replace("JWT", "").trim();
+  const id = jwt.verify(token, process.env.TOKEN_KEY);
+  console.log(id);
+  const subAdmin = await SubAdmin.findById(id);
+  // // await subAdmin.populate("staffs").execPopulate();
+  subAdmin.staffs = await Staffs.find({ subAdmin: id });
+  res.send(subAdmin.staffs);
+});
+
+router.post("/addDevice", async (req, res) => {
+  const { staffName, newDevice } = req.body
+  const staff = await Staff.findOne({staffName : staffName})
+  if (!Staff) {
+    res.send("Staff Not Found.")
+  }
+  await staff.devices.push(newDevice)
+  console.log( staff)
+  await staff.save()
+  const updatedStaff = await Staff.findOne({staffName : staffName})
+ res.send(updatedStaff)
+})
 
 export default router;

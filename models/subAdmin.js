@@ -45,6 +45,18 @@ subAdminSchema.pre("save", async function (next) {
   next();
 });
 
+// userSchema.virtual('tasks', {
+//   ref: 'Task',
+//   localField: '_id',
+//   foreignField: 'owner'
+// })
+
+subAdminSchema.virtual("staffs", {
+  ref: "Staff",
+  localField: "_id",
+  foreignField : "subAdmin"
+})
+
 // subAdminSchema.statics.findByCredentials = async (email, password) => {
 //   const subAdmin = await SubAdmin.findOne({ email });
 

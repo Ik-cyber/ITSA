@@ -7,7 +7,7 @@ const sendEmail = (email, data) => {
     service: "gmail",
     host: "smtp.gmail.com",
     port: 587,
-    secure: false, // Use `true` for port 465, `false` for all other ports
+    secure: false,
     auth: {
       user: process.env.EMAIL,
       pass: process.env.EMAIL_PASS,
@@ -17,14 +17,13 @@ const sendEmail = (email, data) => {
     },
   });
   transporter.sendMail({
-    from: '"ITSA" <numterminal@gmail.com>', // sender address
-    to: email, // list of receivers
-    subject: "ITSA app", // Subject line
-    text: `BodyT`, // plain text body
-    html: `Name: ${data.name}, Password: ${data.password}`, // html body
+    from: '"ITSA" <numterminal@gmail.com>',
+    to: email,
+    subject: "ITSA app",
+    text: `BodyT`,
+    html: `Name: ${data.name}, Password: ${data.password}`,
   });
 
-  console.log("Sent Email")
 };
 
-export default sendEmail
+export default sendEmail;

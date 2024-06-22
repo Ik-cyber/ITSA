@@ -49,14 +49,12 @@ router.post("/subAdmins/login", async (req, res) => {
       return res.json({ message: "Incorrect password or email" });
     }
     const token = createSecretToken(subAdmin._id);
-    res
-      .status(201)
-      .json({
-        message: "User logged in successfully",
-        success: true,
-        subAdmin,
-        token,
-      });
+    res.status(201).json({
+      message: "User logged in successfully",
+      success: true,
+      subAdmin,
+      token,
+    });
   } catch (error) {
     console.error(error);
   }
@@ -65,25 +63,35 @@ router.post("/subAdmins/login", async (req, res) => {
 router.get("/subAdmin/staffs", async (req, res) => {
   const headerData = req.header("Authorization");
   const token = headerData.replace("JWT", "").trim();
-  const id = jwt.verify(token, process.env.TOKEN_KEY);
-  console.log(id);
-  const subAdmin = await SubAdmin.findById(id);
-  // // await subAdmin.populate("staffs").execPopulate();
-  subAdmin.staffs = await Staffs.find({ subAdmin: id });
-  res.send(subAdmin.staffs);
+  try {
+    const id = jwt.verify(token, process.env.TOKEN_KEY);
+    const subAdmin = await SubAdmin.findById(id.id);
+    subAdmin.staffs = await Staffs.find({ subAdmin : id.id})
+    res.send(subAdmin.staffs);
+  } catch (e) {
+    res.send("Please Authenticate")
+  }
+
+ 
 });
 
 router.post("/addDevice", async (req, res) => {
-  const { staffName, newDevice } = req.body
-  const staff = await Staff.findOne({staffName : staffName})
-  if (!Staff) {
-    res.send("Staff Not Found.")
+  const headerData = req.header("Authorization");
+  const token = headerData.replace("JWT", "").trim();
+  try {
+    const id = jwt.verify(token, process.env.TOKEN_KEY);
+    const { staffName, newDevice } = req.body;
+    const staff = await Staff.findOne({ staffName: staffName });
+    if (!Staff) {
+      res.send("Staff Not Found.");
+    }
+    await staff.devices.push(newDevice);
+    await staff.save();
+    const updatedStaff = await Staff.findOne({ staffName: staffName });
+    res.send(updatedStaff);
+  } catch (e) {
+    res.send("Please Authenticate.")
   }
-  await staff.devices.push(newDevice)
-  console.log( staff)
-  await staff.save()
-  const updatedStaff = await Staff.findOne({staffName : staffName})
- res.send(updatedStaff)
-})
+});
 
 export default router;

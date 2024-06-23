@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import userRouter from "./router/staff.js";
 import subAdminRouter from "./router/subAdmin.js";
 import testRouter from "./router/testRouter.js";
-import companySignUpRouter from "./router/companySignUp.js";
 import pcApiTest from "./router/pcApiTest.js";
 import cors from "cors";
 const app = express();
@@ -31,7 +30,6 @@ app.use(bodyParser.json());
 
 app.use(userRouter);
 app.use(subAdminRouter);
-app.use(companySignUpRouter);
 app.use(pcApiTest);
 
 app.use(testRouter);

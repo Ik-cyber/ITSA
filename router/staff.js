@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import Staff from "../models/staff.js";
+import Request from "../models/requests.js";
 import sendEmail from "../utils/emails.js";
 import jwt from "jsonwebtoken";
 import generator from "generate-password";
@@ -85,6 +86,48 @@ router.post("/staffs/login", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+  }
+});
+
+router.post("/request", async (req, res) => {
+  const headerData = req.header("Authorization");
+  const tokenFromHeader = headerData.replace("JWT", "").trim();
+  const staffId = jwt.verify(
+    tokenFromHeader,
+    process.env.TOKEN_KEY,
+    function (err, decode) {
+      if (err) {
+        return "Invalid";
+      }
+      return decode;
+    }
+  );
+  if (staffId === "Invalid") {
+    res.send("Please SAuth");
+  }
+  const id = staffId.id;
+  const { request, deviceName, status, category } = req.body;
+  const requestMade = await Request.create({
+    staff: id,
+    deviceName: deviceName,
+    category: category,
+    status: status,
+    request: request,
+  });
+  res.send("Added")
+});
+
+router.get("/requests", async (req, res) => {
+  const headerData = req.header("Authorization");
+  const token = headerData.replace("JWT", "").trim();
+  try {
+    const id = jwt.verify(token, process.env.TOKEN_KEY);
+    const staff = await Staff.findById(id.id).populate("requests");
+    staff.requests = await Request.find({ staff: id.id });
+
+    res.send(staff.requests);
+  } catch (e) {
+    res.send(`Please Authenticate ${e}`);
   }
 });
 

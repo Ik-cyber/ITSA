@@ -49,4 +49,14 @@ router.get("/pcApiTest/cookie", (req, res) => {
   // res.cookie("table", "table", { maxAge: 900000, httpOnly: true });
 });
 
+router.post("/pyScript", (req, res) => {
+  const data = req.body
+  console.log(data)
+  res.send("Data Recevied")
+})
+
+router.get("/pyScript", (req, res) => {
+  res.send("Pyscript server working.")
+})
+
 export default router;

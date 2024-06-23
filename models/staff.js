@@ -38,6 +38,13 @@ const staffSchema = new mongoose.Schema({
   devices: [deviceDetailsSchema],
 });
 
+staffSchema.virtual("requests", {
+  ref: "Request",
+  localField: "_id",
+  foreignField: "staff",
+});
+
+
 staffSchema.pre("save", async function (next) {
   var user = this;
 

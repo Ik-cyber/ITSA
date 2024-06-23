@@ -2,8 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import SubAdmin from "../models/subAdmin.js";
-import Staffs from "../models/staff.js";
-
+import Request from "../models/requests.js";
 import createSecretToken from "../utils/SecretJson.js";
 import Staff from "../models/staff.js";
 
@@ -67,15 +66,13 @@ router.get("/subAdmin/staffs", async (req, res) => {
   try {
     const id = jwt.verify(token, process.env.TOKEN_KEY);
     const subAdmin = await SubAdmin.findById(id.id);
-    
-    subAdmin.staffs = await Staffs.find({ subAdmin : id.id})
-  
+
+    subAdmin.staffs = await Staff.find({ subAdmin: id.id });
+
     res.send(subAdmin.staffs);
   } catch (e) {
-    res.send("Please Authenticate")
+    res.send(`Please Authenticate ${e}`);
   }
-
- 
 });
 
 router.post("/addDevice", async (req, res) => {
@@ -93,7 +90,28 @@ router.post("/addDevice", async (req, res) => {
     const updatedStaff = await Staff.findOne({ staffName: staffName });
     res.send(updatedStaff);
   } catch (e) {
-    res.send("Please Authenticate.")
+    res.send("Please Authenticate.");
+  }
+});
+
+router.post("/deleteStaff/:id", async (req, res) => {
+  const headerData = req.header("Authorization");
+  const token = headerData.replace("JWT", "").trim();
+  try {
+    const id = jwt.verify(token, process.env.TOKEN_KEY);
+    if (!id) {
+      res.send("Please Authenticate");
+    }
+    const staffId = req.params.id;
+    const staff = await Staff.findByIdAndDelete(staffId);
+    const requests = await Request.deleteMany({staff : staffId});
+    console.log({
+      staff,
+      requests
+    });
+    res.send("Successful")
+  } catch (e) {
+    res.send(`Please Authenticate. ${e}`);
   }
 });
 

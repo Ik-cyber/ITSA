@@ -9,9 +9,13 @@ const subAdminSchema = new mongoose.Schema({
     required: [true, "Your email address is required"],
     unique: true,
   },
-  adminName: {
+  companyName: {
     type: String,
     required: [true, "Your name is required"],
+  },
+  phoneNumber : {
+    type : String,
+    required : [true, "Enter your phone Number."]
   },
   password: {
     type: String,

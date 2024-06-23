@@ -11,15 +11,16 @@ const router = express.Router();
 
 router.post("/subAdmin", async (req, res) => {
   try {
-    const { email, password, adminName, createdAt } = req.body;
+    const { email, password, companyName, phoneNumber, createdAt } = req.body;
     const existingUser = await SubAdmin.findOne({ email });
     if (existingUser) {
-      return res.json({ message: "User already exists" });
+      return res.json({ message: "Company already exists" });
     }
     const subAdmin = await SubAdmin.create({
       email,
       password,
-      adminName,
+      companyName,
+      phoneNumber,
       createdAt,
     });
     const token = createSecretToken(subAdmin._id);
@@ -66,7 +67,9 @@ router.get("/subAdmin/staffs", async (req, res) => {
   try {
     const id = jwt.verify(token, process.env.TOKEN_KEY);
     const subAdmin = await SubAdmin.findById(id.id);
+    
     subAdmin.staffs = await Staffs.find({ subAdmin : id.id})
+  
     res.send(subAdmin.staffs);
   } catch (e) {
     res.send("Please Authenticate")
